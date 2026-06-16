@@ -46,12 +46,6 @@ export default function UserProfile({ user }: UserProfileProps) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="font-medium">
-                <Link href={`/users/${user.username}`}>
-                    <DropdownMenuItem className="h-10">
-                        <UserIcon />
-                        <p>{user.name}</p>
-                    </DropdownMenuItem>
-                </Link>
                 <DropdownMenuItem onClick={handleSignOut} className="h-10">
                     <LogOut />
                     Sign Out

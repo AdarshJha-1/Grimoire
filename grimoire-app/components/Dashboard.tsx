@@ -1,42 +1,34 @@
-import React from 'react'
+import React from "react"
+import { desc, eq } from "drizzle-orm"
+import { redirect } from "next/navigation"
 import { GrimoireCard } from "@/components/GrimoireCard"
+import { RefreshButton } from "@/components/RefreshButton" // 👈 Imported your new client refresh mechanism
 import { ShieldAlert, BookOpen, Layers, Search, Sparkles } from "lucide-react"
+import { getServerSession } from "@/lib/getServerSession"
+import { db } from "@/db/drizzle"
+import { fragments } from "@/db/schema"
 
-// Simulated database response for the current logged-in user
-const sampleClips = [
-    {
-        id: "1",
-        title: "Omniscient Reader's Viewpoint - Ch. 182",
-        sourceUrl: "https://webtoons.com",
-        rawText: "There are three ways to survive in a ruined world. Now, I have forgotten a few, but one thing is certain. The fact that you who are reading these words will survive.",
-        aiSummary: "The overarching theme statement of the series establishing the core condition of survival tied directly to textual observation.",
-        tags: ["manhwa", "orv", "quotes"],
-        timestamp: "2 hours ago"
-    },
-    {
-        id: "2",
-        title: "System Design Frameworks PDF - Page 42",
-        sourceUrl: "https://academy.dev",
-        rawText: "Stateless architectures scale horizontally by offloading session data storage to distributed caching layers like Redis or distributed transactional relational databases.",
-        aiSummary: "Architectural strategy outlining horizontal scaling mechanics via external token caches.",
-        tags: ["backend", "pdf", "dev"],
-        timestamp: "Yesterday"
-    },
-    {
-        id: "3",
-        title: "Frieren: Beyond Journey's End - Episode 10",
-        sourceUrl: "https://crunchyroll.com",
-        rawText: "The magic that is visualizable is the magic that can be executed. If you cannot clearly picture yourself overcoming the absolute defense of your opponent, your mana will shatter.",
-        aiSummary: "The conceptual boundary of combat visualization logic ruling elven magical systems.",
-        tags: ["anime", "magic-theory"],
-        timestamp: "3 days ago"
+export default async function Dashboard() {
+    const session = await getServerSession()
+    if (!session || !session.user) {
+        redirect("/")
     }
-]
 
-export default function Dashboard() {
+    const userFragments = await db.query.fragments.findMany({
+        where: eq(fragments.userId, session.user.id),
+        orderBy: [desc(fragments.createdAt)]
+    })
+
+    const totalFragments = userFragments.length
+    const uniqueDomainsCount = new Set(
+        userFragments.map(f => {
+            try { return new URL(f.sourceUrl).hostname }
+            catch { return "unknown" }
+        })
+    ).size
+
     return (
         <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
-
             <header className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border/40 pb-6">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
@@ -48,44 +40,49 @@ export default function Dashboard() {
                     </p>
                 </div>
 
-                <div className="relative max-w-sm w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                        type="text"
-                        placeholder="Search through spellbooks..."
-                        className="w-full bg-card border border-border/60 rounded-md py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:border-primary/60 transition-all placeholder:text-muted-foreground/60"
-                    />
+                {/* 🛠️ Header Control Row Deck */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-md w-full">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                            type="text"
+                            placeholder="Search through spellbooks..."
+                            className="w-full bg-card border border-border/60 rounded-md py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:border-primary/60 transition-all placeholder:text-muted-foreground/60"
+                        />
+                    </div>
+                    {/* Injected active refresh execution node trigger */}
+                    <RefreshButton />
                 </div>
             </header>
 
-            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="bg-card border border-border/40 p-4 rounded-lg flex items-center gap-3">
-                    <div className="p-2.5 rounded-md bg-primary/10 text-primary">
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+                <div className="bg-card border border-border/40 p-5 rounded-xl flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10 text-primary">
                         <BookOpen className="h-5 w-5" />
                     </div>
                     <div>
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">Total Fragments</div>
-                        <div className="text-xl font-bold">{sampleClips.length} Notes</div>
+                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Total Fragments</div>
+                        <div className="text-2xl font-black mt-0.5">{totalFragments} Notes</div>
                     </div>
                 </div>
 
-                <div className="bg-card border border-border/40 p-4 rounded-lg flex items-center gap-3">
-                    <div className="p-2.5 rounded-md bg-primary/10 text-primary">
+                <div className="bg-card border border-border/40 p-5 rounded-xl flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10 text-primary">
                         <Layers className="h-5 w-5" />
                     </div>
                     <div>
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">Unique Sources</div>
-                        <div className="text-xl font-bold">3 Domains</div>
+                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Unique Sources</div>
+                        <div className="text-2xl font-black mt-0.5">{uniqueDomainsCount} Domains</div>
                     </div>
                 </div>
 
-                <div className="bg-card border border-border/40 p-4 rounded-lg flex items-center gap-3">
-                    <div className="p-2.5 rounded-md bg-primary/10 text-primary">
+                <div className="bg-card border border-border/40 p-5 rounded-xl flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10 text-primary">
                         <ShieldAlert className="h-5 w-5" />
                     </div>
                     <div>
-                        <div className="text-xs text-muted-foreground uppercase font-semibold">Sync Status</div>
-                        <div className="text-sm font-semibold text-primary flex items-center gap-1.5 mt-0.5">
+                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Sync Status</div>
+                        <div className="text-sm font-bold text-primary flex items-center gap-1.5 mt-1.5">
                             <span className="h-2 w-2 rounded-full bg-primary inline-block animate-ping" />
                             Grimoire Online
                         </div>
@@ -93,20 +90,26 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sampleClips.map((clip) => (
-                    <GrimoireCard
-                        key={clip.id}
-                        title={clip.title}
-                        sourceUrl={clip.sourceUrl}
-                        rawText={clip.rawText}
-                        aiSummary={clip.aiSummary}
-                        tags={clip.tags}
-                        timestamp={clip.timestamp}
-                    />
-                ))}
-            </main>
-
+            {totalFragments === 0 ? (
+                <div className="text-center py-25 border border-dashed border-border/40 rounded-xl bg-card/20">
+                    <p className="text-sm text-muted-foreground">Your Grimoire is empty. Highlight something on the web to bind your first note!</p>
+                </div>
+            ) : (
+                <main className="max-w-4xl mx-auto flex flex-col gap-4 w-full pt-2">
+                    {userFragments.map((clip) => (
+                        <GrimoireCard
+                            key={clip.id}
+                            title={clip.pageTitle}
+                            sourceUrl={clip.sourceUrl}
+                            faviconUrl={clip.faviconUrl}
+                            rawText={clip.rawText}
+                            aiSummary={clip.aiSummary ?? "Appraisal pending..."}
+                            tags={clip.tags}
+                            timestamp={new Date(clip.createdAt).toLocaleDateString()}
+                        />
+                    ))}
+                </main>
+            )}
         </div>
     )
 }

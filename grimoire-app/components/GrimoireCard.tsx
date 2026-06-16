@@ -1,9 +1,13 @@
+"use client"
+
 import React from 'react'
 import { Shield, Sparkles, BookOpen, Clock } from "lucide-react"
+import Image from 'next/image';
 
 interface GrimoireCardProps {
     title: string
     sourceUrl: string
+    faviconUrl?: string | null
     rawText: string
     aiSummary: string
     tags: string[]
@@ -13,52 +17,75 @@ interface GrimoireCardProps {
 export function GrimoireCard({
     title,
     sourceUrl,
+    faviconUrl,
     rawText,
     aiSummary,
     tags,
     timestamp
 }: GrimoireCardProps) {
-    return (
-        <div className="flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-md transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,197,94,0.12)] hover:border-primary/40 hover:-translate-y-1 overflow-hidden">
 
-            <div className="p-4 pb-3 space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1.5 font-medium tracking-wide">
-                        <BookOpen className="h-3.5 w-3.5 text-primary/80" />
-                        {new URL(sourceUrl).hostname}
+    const displayDomain = React.useMemo(() => {
+        try { return new URL(sourceUrl).hostname }
+        catch { return "web source" }
+    }, [sourceUrl])
+
+    return (
+        <div className="w-full max-w-none flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(34,197,94,0.16)] hover:border-primary/50 hover:-translate-y-1.5 overflow-hidden group">
+
+            <div className="p-6 pb-4 space-y-3">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-2 font-medium tracking-wide">
+                        {faviconUrl ? (
+                            <Image
+                                src={faviconUrl}
+                                alt="faviconUrl"
+                                width={20}
+                                height={20}
+                                className="h-4 w-4 rounded-sm object-contain bg-background"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                }}
+                            />
+                        ) : (
+                            <BookOpen className="h-4 w-4 text-primary/80" />
+                        )}
+                        <span className="truncate max-w-[180px]">{displayDomain}</span>
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs opacity-80">
                         <Clock className="h-3 w-3" />
                         {timestamp}
                     </span>
                 </div>
-                <h3 className="line-clamp-1 font-sans text-base font-bold tracking-tight text-foreground/90">
+
+                <h3 className="line-clamp-2 font-sans text-lg font-extrabold tracking-tight text-foreground/90 leading-snug">
                     {title}
                 </h3>
             </div>
 
-            <div className="px-4 pb-4 flex-1 space-y-4">
-                <div className="relative border-l-2 border-primary/40 bg-muted/40 p-3 italic text-muted-foreground/90 rounded-r">
-                    <p className="text-xs sm:text-sm leading-relaxed line-clamp-4">"{rawText}"</p>
+            <div className="px-6 pb-6 flex-1 space-y-5">
+                <div className="relative border-l-2 border-primary/50 bg-muted/40 p-4 italic text-muted-foreground/90 rounded-r shadow-inner">
+                    <p className="text-sm leading-relaxed line-clamp-5 text-foreground/80">
+                        "{rawText}"
+                    </p>
                 </div>
 
-                <div className="rounded border border-border/40 bg-background/50 p-3">
-                    <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                        <Sparkles className="h-3 w-3" />
+                <div className="rounded-lg border border-border/50 bg-background/60 p-4 shadow-sm">
+                    <div className="mb-2 flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-primary">
+                        <Sparkles className="h-3.5 w-3.5 animate-pulse" />
                         Sage Appraisal
                     </div>
-                    <p className="text-foreground/80 leading-relaxed text-xs">
+                    <p className="text-foreground/90 leading-relaxed text-sm font-medium">
                         {aiSummary}
                     </p>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-border/30 bg-muted/20 px-4 py-2.5 mt-auto">
-                <div className="flex flex-wrap gap-1">
+            <div className="flex items-center justify-between border-t border-border/30 bg-muted/20 px-6 py-3.5 mt-auto">
+                <div className="flex flex-wrap gap-1.5 max-w-[70%]">
                     {tags.map((tag) => (
                         <span
                             key={tag}
-                            className="px-2 py-0.5 rounded bg-secondary text-secondary-foreground text-[10px] font-medium tracking-wide lowercase border border-border/30"
+                            className="px-2.5 py-0.5 rounded-md bg-secondary text-secondary-foreground text-[10px] font-bold tracking-wide border border-border/40 hover:border-primary/30 transition-colors"
                         >
                             #{tag}
                         </span>
@@ -69,9 +96,9 @@ export function GrimoireCard({
                     href={sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-7 items-center gap-1 px-2.5 rounded border border-primary/20 text-[11px] font-bold text-primary bg-transparent hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                    className="inline-flex h-8 items-center gap-1.5 px-3.5 rounded-md border border-primary/20 text-xs font-bold text-primary bg-background/40 hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-sm"
                 >
-                    <Shield className="h-3 w-3" />
+                    <Shield className="h-3.5 w-3.5" />
                     Source
                 </a>
             </div>
