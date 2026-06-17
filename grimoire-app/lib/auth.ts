@@ -10,7 +10,7 @@ export const auth = betterAuth({
         schema
     }),
     trustedOrigins: [
-        "chrome-extension://*"
+        "chrome-extension://" + (process.env.EXTENSION_ID?.replace("chrome-extension://", "") || "")
     ],
     socialProviders: {
         google: {
