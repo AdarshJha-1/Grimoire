@@ -2,6 +2,7 @@
     "manifest_version": 3,
     "name": "Grimoire",
     "version": "1.0.0",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp0n1wYn9lY4mBRKGOPoo1cQgwnxliS4LD0ZTHB+Q3N/s+CwvXWPAy+Ju+OFg34dIZMJavAHFBHozUw34n/+o3CzkPokqkIEumOjkFwY/cNCGdqXU6wHkiJc7x4TzLNqJjAJnqR3NxN8PpNl3J0Qw9HGeZKH4ejnuH/BaR1raASmxNUZ/btdb2ulie/dvZ4R/mJgeJg6GgFxNYMoSrsiKbS+birJW6Z3RhV8KYpEVVdP7DpR5zn5pREfqQWjc9WnY5hdk9DFH+AU1te3HlByj/LAReUueCMbGDWv5XlDgr+Uq2mG7K9BmWH2tcb9qPNmIqCdyF1qKSBtdGh0lc0eFtwIDAQAB",
     "description": "Appraise, summarize, and bind digital web fragments into your central knowledge Grimoire.",
     "icons": {
         "16": "assets/icon-16.png",
@@ -39,5 +40,9 @@
             "48": "assets/icon-48.png",
             "128": "assets/icon-128.png"
         }
-    }
+    },
+    "host_permissions": [
+        "http://localhost:3000/*",
+        "https://vercel.app*"
+    ]
 }

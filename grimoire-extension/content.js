@@ -1,6 +1,10 @@
 let currentFloatingButton = null;
 
 document.addEventListener("mouseup", (event) => {
+    if (currentFloatingButton && currentFloatingButton.contains(event.target)) {
+        return;
+    }
+
     const selectedText = window.getSelection().toString().trim();
 
     if (!selectedText) {
@@ -8,15 +12,17 @@ document.addEventListener("mouseup", (event) => {
         return;
     }
 
-    if (currentFloatingButton) return;
+    if (currentFloatingButton) {
+        removeFloatingButton();
+    }
 
     const button = document.createElement("button");
     button.innerText = "🔮 Appraise";
 
     Object.assign(button.style, {
         position: "fixed",
-        top: `${event.clientY + 10}px`,
-        left: `${event.clientX + 10}px`,
+        top: `${event.clientY + 16}px`,
+        left: `${event.clientX + 16}px`,
         zIndex: "2147483647",
         backgroundColor: "#10b981",
         color: "#0a0f0d",
@@ -30,14 +36,15 @@ document.addEventListener("mouseup", (event) => {
         transition: "all 0.2s ease",
     });
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click", (e) => {
+        e.stopPropagation();
+
         button.disabled = true;
         button.innerText = "⏳ Appraising...";
         button.style.backgroundColor = "#1e293b";
         button.style.color = "#f8fafc";
         button.style.cursor = "not-allowed";
         button.style.boxShadow = "0 0 20px rgba(148, 163, 184, 0.4)";
-
         button.style.animation = "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite";
 
         const payload = {
@@ -45,11 +52,9 @@ document.addEventListener("mouseup", (event) => {
             pageTitle: document.title || window.location.hostname,
             sourceUrl: window.location.href,
             faviconUrl: `https://www.google.com/s2/favicons?sz=64&domain=${window.location.hostname}`,
-
         };
 
         chrome.runtime.sendMessage({ action: "CLIP_NOTE", data: payload }, (response) => {
-
             button.style.animation = "none";
 
             if (response && response.success) {
@@ -59,7 +64,6 @@ document.addEventListener("mouseup", (event) => {
                 button.style.boxShadow = "0 0 25px rgba(34, 197, 94, 0.8)";
                 setTimeout(() => removeFloatingButton(), 1200);
             } else {
-
                 button.innerText = "❌ Failed";
                 button.style.backgroundColor = "#ef4444";
                 button.style.color = "#ffffff";

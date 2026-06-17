@@ -37,7 +37,7 @@ export async function appraiseFragment(rawText: string) {
     } catch (error) {
         console.error("General-purpose appraisal failure:", error);
         return {
-            aiSummary: "Could not parse or process the semantic csontent of this note shard.",
+            aiSummary: "Could not parse or process the semantic content of this note shard.",
             tags: ["general"],
         };
     }

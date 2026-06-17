@@ -2,60 +2,46 @@ import { db } from "@/db/drizzle";
 import { fragments } from "@/db/schema";
 import { getServerSession } from "@/lib/getServerSession";
 import { NextRequest } from "next/server";
-import { eq } from "drizzle-orm";
 import { createFragmentSchema } from "@/lib/validation";
 import { appraiseFragment } from "@/lib/summarize";
 
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+function getCorsHeaders(req: NextRequest) {
+    const origin = req.headers.get("origin") || "";
+    const allowedOrigins = [
+        "http://localhost:3000",
+        process.env.EXTENSION_ID || "",
+    ];
 
-export async function OPTIONS() {
+    const isAllowed = allowedOrigins.includes(origin) || allowedOrigins.includes(`chrome-extension://${origin.replace('chrome-extension://', '')}`);
+    const finalOrigin = isAllowed ? origin : (process.env.EXTENSION_ID || "http://localhost:3000");
+
+    return {
+        "Access-Control-Allow-Origin": finalOrigin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+        "Access-Control-Allow-Credentials": "true",
+    };
+}
+
+export async function OPTIONS(req: NextRequest) {
     return new Response(null, {
         status: 204,
-        headers: corsHeaders,
+        headers: getCorsHeaders(req),
     });
 }
 
-export async function GET(req: NextRequest) {
-    const session = await getServerSession();
-    if (!session || !session.user) {
-        return Response.json({
-            success: false,
-            message: "Unauthorized",
-        }, { status: 401 });
-    }
-
-    try {
-
-        const userFragments = await db.query.fragments.findMany({
-            where: eq(fragments.userId, session.user.id)
-        });
-
-        return Response.json({
-            success: true,
-            data: userFragments
-        }, { status: 200 });
-
-    } catch (error) {
-        return Response.json({
-            success: false,
-            message: "Failed to retrieve your grimoire scrolls.",
-            error: error instanceof Error ? error.message : "Unknown error"
-        }, { status: 500 });
-    }
-}
-
-
 export async function POST(req: NextRequest) {
+    const corsHeaders = getCorsHeaders(req);
     const session = await getServerSession();
+
     if (!session || !session.user) {
         return Response.json({
             success: false,
             message: "Unauthorized",
-        }, { status: 401 });
+        }, {
+            status: 401,
+            headers: corsHeaders
+        });
     }
 
     try {
@@ -67,10 +53,13 @@ export async function POST(req: NextRequest) {
                 success: false,
                 message: "Validation failed",
                 errors: result.error.flatten().fieldErrors
-            }, { status: 400 });
+            }, {
+                status: 400,
+                headers: corsHeaders
+            });
         }
 
-        const { data: rawData } = result
+        const { data: rawData } = result;
 
         const { aiSummary, tags } = await appraiseFragment(rawData.rawText);
 
@@ -86,9 +75,22 @@ export async function POST(req: NextRequest) {
             isFavorite: rawData.isFavorite,
         }).returning();
 
-        return Response.json({ success: true, data: newNote[0] }, { status: 201 });
+        return Response.json(
+            { success: true, data: newNote[0] },
+            {
+                status: 201,
+                headers: corsHeaders
+            }
+        );
 
     } catch (error) {
-        return Response.json({ success: false, message: "Server error" }, { status: 500 });
+        console.error("Backend error clipping node:", error);
+        return Response.json({
+            success: false,
+            message: "Server error"
+        }, {
+            status: 500,
+            headers: corsHeaders
+        });
     }
 }

@@ -18,13 +18,13 @@ export default function UnauthenticatedPage() {
                     <div className="flex items-center gap-2">
                         <Image
                             src={logo}
-                            alt="Nakama Logo"
+                            alt="Grimoire Logo"
                             width={40}
                             height={40}
                             className="object-contain"
                         />
                         <span className="font-heading font-black text-xl tracking-tight text-foreground/90">
-                            Nakama
+                            Grimoire
                         </span>
                     </div>
 
@@ -48,7 +48,7 @@ export default function UnauthenticatedPage() {
                     </h1>
 
                     <p className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed">
-                        Welcome back, <span className="text-foreground font-semibold">Nakama</span>. Highlight lines, quotes, and lore from any manga, light novel, website, or PDF, and sync them seamlessly into your personal library.
+                        Welcome back, <span className="text-foreground font-semibold">Grimoire</span>. Highlight lines, quotes, and lore from any manga, light novel, website, or PDF, and sync them seamlessly into your personal library.
                     </p>
 
                     <div className="pt-4 scale-110 hover:scale-105 transition-transform duration-200">
@@ -99,7 +99,7 @@ export default function UnauthenticatedPage() {
             </main>
 
             <footer className="w-full border-t border-border/20 py-4 text-center text-[11px] text-muted-foreground/60 z-10 bg-background/50">
-                Nakama Hub © {new Date().getFullYear()} — Powered by Wind Magic & Better Auth
+                Grimoire © {new Date().getFullYear()} — Powered by Wind Magic & Better Auth
             </footer>
 
         </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
 import { RefreshCw } from "lucide-react"
 
 export function RefreshButton() {
@@ -10,7 +10,6 @@ export function RefreshButton() {
 
     const handleRefresh = () => {
         startTransition(() => {
-            // Re-executes the parent Server Component's async data fetch loops instantly
             router.refresh()
         })
     }

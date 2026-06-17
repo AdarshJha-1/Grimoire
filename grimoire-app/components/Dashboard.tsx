@@ -1,9 +1,8 @@
-import React from "react"
 import { desc, eq } from "drizzle-orm"
 import { redirect } from "next/navigation"
 import { GrimoireCard } from "@/components/GrimoireCard"
-import { RefreshButton } from "@/components/RefreshButton" // 👈 Imported your new client refresh mechanism
-import { ShieldAlert, BookOpen, Layers, Search, Sparkles } from "lucide-react"
+import { RefreshButton } from "@/components/RefreshButton"
+import { ShieldAlert, BookOpen, Layers, Sparkles } from "lucide-react"
 import { getServerSession } from "@/lib/getServerSession"
 import { db } from "@/db/drizzle"
 import { fragments } from "@/db/schema"
@@ -40,19 +39,7 @@ export default async function Dashboard() {
                     </p>
                 </div>
 
-                {/* 🛠️ Header Control Row Deck */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-md w-full">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search through spellbooks..."
-                            className="w-full bg-card border border-border/60 rounded-md py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:border-primary/60 transition-all placeholder:text-muted-foreground/60"
-                        />
-                    </div>
-                    {/* Injected active refresh execution node trigger */}
-                    <RefreshButton />
-                </div>
+                <RefreshButton />
             </header>
 
             <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
